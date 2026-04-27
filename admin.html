@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - CHEAP OTP</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #0a0e27;
+            color: #fff;
+        }
+
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 260px;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .sidebar .logo {
+            font-size: 24px;
+            font-weight: 800;
+            text-align: center;
+            padding: 20px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 20px;
+        }
+
+        .sidebar .logo span {
+            background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .menu-item {
+            padding: 12px 15px;
+            margin: 5px 0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: rgba(78, 205, 196, 0.2);
+        }
+
+        .menu-item i {
+            margin-right: 10px;
+            color: #4ECDC4;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-card i {
+            font-size: 32px;
+            color: #4ECDC4;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        th {
+            color: #4ECDC4;
+        }
+
+        .status-pending {
+            background: rgba(255, 165, 2, 0.2);
+            color: #ffa502;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .status-approved {
+            background: rgba(78, 205, 196, 0.2);
+            color: #4ECDC4;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 0 2px;
+        }
+
+        .btn-approve {
+            background: #4ECDC4;
+            color: #0a0e27;
+        }
+
+        .btn-reject {
+            background: #FF6B6B;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #4ECDC4, #FF6B6B);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #0f0c29, #302b63);
+        }
+
+        .login-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 24px;
+            width: 350px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="loginScreen" class="login-container">
+        <div class="login-box">
+            <h2 style="text-align:center; margin-bottom:30px;">Admin Login</h2>
+            <div id="adminError" style="color:#FF6B6B; margin-bottom:15px;"></div>
+            <div class="form-group">
+                <input type="text" id="adminUsername" placeholder="Username" style="background:rgba(255,255,255,0.2);">
+            </div>
+            <div class="form-group">
+                <input type="password" id="adminPassword" placeholder="Password" style="background:rgba(255,255,255,0.2);">
+            </div>
+            <button class="btn-primary" style="width:100%;" onclick="adminLogin()">Login</button>
+        </div>
+    </div>
+
+    <div id="adminPanel" class="hidden">
+        <div class="sidebar">
+            <div class="logo">
+                <i class="fas fa-crown"></i> <span>Admin Panel</span>
+            </div>
+            <div class="menu-item active" onclick="showSection('dashboard')">
+                <i class="fas fa-tachometer-alt"></i> Dashboard
+            </div>
+            <div class="menu-item" onclick="showSection('users')">
+                <i class="fas fa-users"></i> Users
+            </div>
+            <div class="menu-item" onclick="showSection('deposits')">
+                <i class="fas fa-money-bill"></i> Deposits
+            </div>
+            <div class="menu-item" onclick="showSection('orders')">
+                <i class="fas fa-shopping-cart"></i> Orders
+            </div>
+            <div class="menu-item" onclick="showSection('promo')">
+                <i class="fas fa-tag"></i> Promo Codes
+            </div>
+            <div class="menu-item" onclick="showSection('addAdmin')">
+                <i class="fas fa-user-plus"></i> Add Admin
+            </div>
+            <div class="menu-item" onclick="logout()">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </div>
+        </div>
+
+        <div class="main-content">
+            <div id="dashboardSection">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-users"></i>
+                        <h3 id="totalUsers">0</h3>
+                        <p>Total Users</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <h3 id="totalDeposits">₹0</h3>
+                        <p>Total Deposits</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-shopping-cart"></i>
+                        <h3 id="totalOrders">0</h3>
+                        <p>Total Orders</p>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-chart-line"></i>
+                        <h3 id="todayCollection">₹0</h3>
+                        <p>Today's Collection</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="usersSection" class="hidden">
+                <div class="card">
+                    <h3><i class="fas fa-users"></i> All Users</h3>
+                    <div style="overflow-x:auto;">
+                        <table id="usersTable">
+                            <thead>
+                                <tr><th>ID</th><th>Name</th><th>Email</th><th>Balance</th><th>Orders</th><th>Joined</th></tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="depositsSection" class="hidden">
+                <div class="card">
+                    <h3><i class="fas fa-money-bill"></i> Deposit Requests</h3>
+                    <div style="overflow-x:auto;">
+                        <table id="depositsTable">
+                            <thead><tr><th>ID</th><th>User</th><th>Amount</th><th>Transaction ID</th><th>Status</th><th>Action</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="ordersSection" class="hidden">
+                <div class="card">
+                    <h3><i class="fas fa-shopping-cart"></i> All Orders</h3>
+                    <div style="overflow-x:auto;">
+                        <table id="ordersTable">
+                            <thead><tr><th>ID</th><th>User</th><th>Number</th><th>Service</th><th>Amount</th><th>OTP</th><th>Status</th></tr></thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div id="promoSection" class="hidden">
+                <div class="card">
+                    <h3><i class="fas fa-tag"></i> Generate Promo Code</h3>
+                    <div class="form-group">
+                        <input type="number" id="promoAmount" placeholder="Discount Amount (₹)" style="background:rgba(255,255,255,0.1);">
+                    </div>
+                    <div class="form-group">
+                        <input type="number" id="promoUses" placeholder="Number of uses" style="background:rgba(255,255,255,0.1);">
+                    </div>
+                    <button class="btn-primary" onclick="generatePromo()">Generate Code</button>
+                    <div id="generatedCode" style="margin-top:20px; padding:10px; background:rgba(78,205,196,0.2); border-radius:8px;"></div>
+                </div>
+                <div class="card">
+                    <h3>Existing Promo Codes</h3>
+                    <table id="promoTable"><tbody></tbody></table>
+                </div>
+            </div>
+
+            <div id="addAdminSection" class="hidden">
+                <div class="card">
+                    <h3><i class="fas fa-user-plus"></i> Add New Admin</h3>
+                    <div class="form-group">
+                        <input type="text" id="adminName" placeholder="Full Name" style="background:rgba(255,255,255,0.1);">
+                    </div>
+                    <div class="form-group">
+                        <input type="email" id="adminEmail" placeholder="Email" style="background:rgba(255,255,255,0.1);">
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="adminPass" placeholder="Password" style="background:rgba(255,255,255,0.1);">
+                    </div>
+                    <button class="btn-primary" onclick="addNewAdmin()">Add Admin</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function adminLogin() {
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
+            
+            if (username === 'nikunj_bhai' && password === 'Nikunj143') {
+                localStorage.setItem('adminLoggedIn', 'true');
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('adminPanel').classList.remove('hidden');
+                loadAllData();
+            } else {
+                document.getElementById('adminError').innerText = 'Invalid credentials!';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('adminLoggedIn');
+            location.reload();
+        }
+
+        function checkAdminAuth() {
+            if (localStorage.getItem('adminLoggedIn') === 'true') {
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('adminPanel').classList.remove('hidden');
+                loadAllData();
+            }
+        }
+
+        function showSection(section) {
+            document.querySelectorAll('.main-content > div').forEach(div => div.classList.add('hidden'));
+            document.getElementById(section + 'Section').classList.remove('hidden');
+        }
+
+        async function loadAllData() {
+            await loadUsers();
+            await loadDeposits();
+            await loadOrders();
+            await loadStats();
+        }
+
+        async function loadUsers() {
+            const response = await fetch('api.php?action=getAllUsers');
+            const data = await response.json();
+            if (data.success) {
+                const tbody = document.querySelector('#usersTable tbody');
+                tbody.innerHTML = data.users.map(user => `
+                    <tr>
+                        <td>${user.id}</td>
+                        <td>${user.name}</td>
+                        <td>${user.email}</td>
+                        <td>₹${user.balance}</td>
+                        <td>${user.total_orders || 0}</td>
+                        <td>${user.created_at}</td>
+                    </tr>
+                `).join('');
+                document.getElementById('totalUsers').innerText = data.users.length;
+            }
+        }
+
+        async function loadDeposits() {
+            const response = await fetch('api.php?action=getAllDeposits');
+            const data = await response.json();
+            if (data.success) {
+                const tbody = document.querySelector('#depositsTable tbody');
+                tbody.innerHTML = data.deposits.map(deposit => `
+                    <tr>
+                        <td>${deposit.id}</td>
+                        <td>${deposit.user_email}</td>
+                        <td>₹${deposit.amount}</td>
+                        <td>${deposit.transaction_id}</td>
+                        <td><span class="status-${deposit.status}">${deposit.status}</span></td>
+                        <td>
+                            ${deposit.status === 'pending' ? `
+                                <button class="btn-sm btn-approve" onclick="approveDeposit(${deposit.id})">Approve</button>
+                                <button class="btn-sm btn-reject" onclick="rejectDeposit(${deposit.id})">Reject</button>
+                            ` : '-'}
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        }
+
+        async function loadOrders() {
+            const response = await fetch('api.php?action=getAllOrders');
+            const data = await response.json();
+            if (data.success) {
+                const tbody = document.querySelector('#ordersTable tbody');
+                tbody.innerHTML = data.orders.map(order => `
+                    <tr>
+                        <td>${order.id}</td>
+                        <td>${order.user_email}</td>
+                        <td>${order.phone_number}</td>
+                        <td>${order.service}</td>
+                        <td>₹${order.amount}</td>
+                        <td>${order.otp_code || '-'}</td>
+                        <td><span class="status-${order.status}">${order.status}</span></td>
+                    </tr>
+                `).join('');
+                document.getElementById('totalOrders').innerText = data.orders.length;
+            }
+        }
+
+        async function loadStats() {
+            const response = await fetch('api.php?action=getStats');
+            const data = await response.json();
+            if (data.success) {
+                document.getElementById('totalDeposits').innerText = `₹${data.total_deposits}`;
+                document.getElementById('todayCollection').innerText = `₹${data.today_collection}`;
+            }
+        }
+
+        async function approveDeposit(id) {
+            await fetch(`api.php?action=approveDeposit&id=${id}`);
+            loadDeposits();
+            loadUsers();
+            loadStats();
+            showToast('Deposit approved!');
+        }
+
+        async function rejectDeposit(id) {
+            await fetch(`api.php?action=rejectDeposit&id=${id}`);
+            loadDeposits();
+            showToast('Deposit rejected!');
+        }
+
+        function generatePromo() {
+            const amount = document.getElementById('promoAmount').value;
+            const uses = document.getElementById('promoUses').value;
+            const code = 'OTP' + Math.random().toString(36).substring(2, 8).toUpperCase();
+            document.getElementById('generatedCode').innerHTML = `
+                <strong>New Promo Code:</strong> ${code}<br>
+                <strong>Discount:</strong> ₹${amount}<br>
+                <strong>Uses Left:</strong> ${uses}<br>
+                <button class="btn-sm btn-approve" onclick="savePromo('${code}', ${amount}, ${uses})">Save Code</button>
+            `;
+        }
+
+        async function savePromo(code, amount, uses) {
+            await fetch('api.php?action=savePromo', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code, amount, uses })
+            });
+            showToast('Promo code saved!');
+            loadPromos();
+        }
+
+        async function addNewAdmin() {
+            const name = document.getElementById('adminName').value;
+            const email = document.getElementById('adminEmail').value;
+            const password = document.getElementById('adminPass').value;
+            
+            await fetch('api.php?action=addAdmin', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, email, password })
+            });
+            showToast('New admin added!');
+        }
+
+        function showToast(msg) {
+            alert(msg);
+        }
+
+        checkAdminAuth();
+    </script>
+</body>
+</html>
